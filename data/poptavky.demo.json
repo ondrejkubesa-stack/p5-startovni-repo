@@ -1,0 +1,6 @@
+[
+  { "id": "demo-1", "prijato": "2027-03-01", "kanal": "web", "popis": "Vestavěná skříň do předsíně, šířka 2,5 m, posuvné dveře se zrcadlem", "odhad_kc": 40230, "stav": "nabidka", "termin_zamereni": null },
+  { "id": "demo-2", "prijato": "2027-03-04", "kanal": "telefon", "popis": "Kuchyňská linka do chaty, dvířka masiv, bez spotřebičů", "odhad_kc": null, "stav": "zamereni", "termin_zamereni": "2027-03-13" },
+  { "id": "demo-3", "prijato": "2027-03-06", "kanal": "e-mail", "popis": "Oprava dvířek u šatní skříně, 2 panty", "odhad_kc": 1500, "stav": "vyhrano", "termin_zamereni": null },
+  { "id": "demo-4", "prijato": "2027-03-09", "kanal": "osobne", "popis": "Botník do úzké chodby, hloubka max. 25 cm", "odhad_kc": null, "stav": "nova", "termin_zamereni": null }
+]

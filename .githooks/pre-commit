@@ -1,0 +1,34 @@
+#!/bin/sh
+# gitleaks jako pre-commit hook · startovní repo P1 · v1.3 · ověřeno k 2026-10-12 (gitleaks 8.30.1)
+# Zastaví commit, ve kterém je tajný klíč. Fail-closed: bez gitleaks, s cizí konfigurací gitleaks
+# nebo při chybě gitleaks se necommituje.
+# Aktivace v každém klonu: sh scripts/instaluj-hook.sh
+#
+# Co hook NEUMÍ (proto je poslední pojistka workflow gitleaks na GitHubu):
+# - běží jen u tebe; vypne ho `git commit --no-verify` / `-n` (i ve shluku `-an`), jiný core.hooksPath,
+#   GIT_CONFIG_* proměnné nebo smazání souboru. Deny v .claude/settings.json to Claude Code jen ztěžuje.
+# - věří programu `gitleaks`, který najde v PATH; podvržený program se stejným jménem ho obejde.
+# - pozná jen klíče, které gitleaks zná (vzory); obecná hesla a obsah .xlsx/.docx/.pdf nepozná.
+
+# Konfiguraci z proměnných prostředí nepřijímáme: GITLEAKS_CONFIG(_TOML) by umělo vypnout všechna pravidla.
+unset GITLEAKS_CONFIG GITLEAKS_CONFIG_TOML
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "STOP: gitleaks není nainstalovaný, commit zastaven." >&2
+  echo "Instalace: macOS 'brew install gitleaks', Linux/WSL viz README (oddíl Instalace gitleaks)." >&2
+  exit 1
+fi
+
+# gitleaks si sám načte .gitleaks.toml (vlastní pravidla, allowlist) a .gitleaksignore (výjimky nálezů)
+# z kořene repa. Jeden řádek v nich umí nález schovat, proto je kurz nepoužívá a hook je odmítne.
+for f in .gitleaks.toml .gitleaksignore; do
+  if [ -e "$f" ] || [ -n "$(git ls-files -- "$f" 2>/dev/null)" ]; then
+    echo "STOP: v repu je $f (výjimky pro gitleaks). Kurz je nepoužívá; soubor odstraň, falešný nález řeš úpravou textu." >&2
+    exit 1
+  fi
+done
+
+# --staged: kontroluje jen to, co jde do commitu · --redact: nalezenou hodnotu nevypíše
+# --ignore-gitleaks-allow: komentář „gitleaks:allow“ na řádku s klíčem nález neschová
+# Kód 0 = čisto, cokoli jiného (nález i chyba gitleaks) commit zastaví.
+exec gitleaks git --pre-commit --staged --redact --ignore-gitleaks-allow --verbose --no-banner

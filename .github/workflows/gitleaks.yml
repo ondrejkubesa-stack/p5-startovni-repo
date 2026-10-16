@@ -1,0 +1,54 @@
+# Druhá vrstva na GitHubu: detekce, sken celé historie po každém pushi. Běží až po pushi, klíč už na serveru je,
+# takže nález znamená okamžitě klíč zneplatnit (rotovat). Není to prevence a zelený běh není důkaz čistoty.
+# U soukromého repa na osobním účtu je to jediná kontrola na straně GitHubu (repozitářová push protection vyžaduje placenou GitHub Secret Protection).
+# Akce připnutá na SHA (ověřeno: tag v7.0.1 = 3d3c42e…), gitleaks připnutý na verzi a kontrolní součet
+# (ověřeno proti gitleaks_8.30.1_checksums.txt). Ověřeno k 2026-10-12, volatilní (nové verze).
+# Výjimky (.gitleaks.toml, .gitleaksignore, komentář gitleaks:allow) workflow nepřijímá: jinak by je
+# mohl do repa přidat kdokoli (i agent) a sken by „prošel“.
+# Workflow je soubor v repu: kdo smí pushovat, smí ho i změnit. Proti tomu pomáhá jen nastavení na GitHubu
+# (ruleset s povinnou kontrolou, změny přes pull request) a token gh s minimálním oprávněním, viz lekce P1.
+# Používá CLI gitleaks (MIT), ne gitleaks-action (od v2 vlastní licence, u organizací vyžaduje licenční klíč).
+name: gitleaks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Instalace gitleaks (připnutá verze + SHA-256)
+        env:
+          GITLEAKS_VERSION: "8.30.1"
+          GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+        run: |
+          # Mimo pracovní složku repa: soubor „gitleaks“ commitnutý v repu tak nemůže podstrčit jiný program.
+          cd "$RUNNER_TEMP"
+          curl -sSfL -o gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+          ./gitleaks version
+
+      - name: Žádné výjimky pro gitleaks
+        run: |
+          for f in .gitleaks.toml .gitleaksignore; do
+            if [ -e "$f" ]; then echo "::error::V repu je $f (výjimky pro gitleaks). Kurz je nepoužívá, odstraň ho."; exit 1; fi
+          done
+
+      - name: Sken celé historie
+        env:
+          GITLEAKS_CONFIG: ""
+          GITLEAKS_CONFIG_TOML: ""
+        run: |
+          "$RUNNER_TEMP/gitleaks" git --redact --ignore-gitleaks-allow --verbose --no-banner .

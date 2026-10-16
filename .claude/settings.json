@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Bash(aws configure export-credentials *)",
+      "Bash(aws configure get *)",
+      "Bash(aws sts get-session-token *)",
+      "Bash(gh alias import *)",
+      "Bash(gh alias set *)",
+      "Bash(gh auth status *--show-token*)",
+      "Bash(gh auth token *)",
+      "Bash(gh pr merge *)",
+      "Bash(gh repo delete *)",
+      "Bash(git credential *)",
+      "Bash(git push * main *)",
+      "Bash(git push * main)",
+      "Bash(git push * master *)",
+      "Bash(git push * master)",
+      "Bash(git push * production *)",
+      "Bash(git push * production)",
+      "Bash(git push *:main *)",
+      "Bash(git push *:main)",
+      "Bash(git push *:master *)",
+      "Bash(git push *:master)",
+      "Bash(git push *:production *)",
+      "Bash(git push *:production)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(npm publish*)",
+      "Bash(rm -fr *)",
+      "Bash(rm -rf *)",
+      "Bash(security find-generic-password *)",
+      "Bash(security find-internet-password *)",
+      "Bash(supabase db reset --linked*)",
+      "Edit(!.env.example)",
+      "Edit(!.env.sample)",
+      "Edit(!.env.template)",
+      "Edit(**/.claude/hooks/**)",
+      "Edit(**/.claude/settings*.json)",
+      "Edit(**/.env)",
+      "Edit(**/.env.*)",
+      "Edit(secrets/**)",
+      "Edit(~/.aws/**)",
+      "Edit(~/.claude/hooks/**)",
+      "Edit(~/.claude/settings*.json)",
+      "Edit(~/.config/gh/**)",
+      "Edit(~/.ssh/**)",
+      "Read(!.env.example)",
+      "Read(!.env.sample)",
+      "Read(!.env.template)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(secrets/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.config/gh/**)",
+      "Read(~/.git-credentials)",
+      "Read(~/.netrc)",
+      "Read(~/.ssh/**)",
+      "mcp__*merge_pull_request*"
+    ],
+    "ask": [
+      "Bash(bun create *)",
+      "Bash(bun x *)",
+      "Bash(bunx *)",
+      "Bash(gh extension install *)",
+      "Bash(git push *)",
+      "Bash(npm add *)",
+      "Bash(npm create *)",
+      "Bash(npm exec *)",
+      "Bash(npm i *)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(npm pkg *)",
+      "Bash(npx *)",
+      "Bash(pip install *)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm create *)",
+      "Bash(pnpm dlx *)",
+      "Bash(supabase *)",
+      "Bash(uvx *)",
+      "Bash(yarn add *)",
+      "Bash(yarn create *)",
+      "Bash(yarn dlx *)",
+      "Edit(.githooks/**)",
+      "Edit(.gitleaks.toml)",
+      "Edit(package-lock.json)",
+      "Edit(package.json)",
+      "Edit(playwright.config.ts)",
+      "Edit(scripts/**)"
+    ],
+    "defaultMode": "acceptEdits",
+    "disableAutoMode": "disable"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Monitor|Read|Edit|Write|NotebookEdit|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/strazce.sh",
+            "args": [],
+            "timeout": 10,
+            "onFailure": "block"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Monitor",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/strazce-p5.sh",
+            "args": [],
+            "timeout": 10,
+            "onFailure": "block"
+          }
+        ]
+      }
+    ]
+  }
+}

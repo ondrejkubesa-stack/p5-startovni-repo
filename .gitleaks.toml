@@ -1,0 +1,15 @@
+# Konfigurace gitleaks pro repo P5 · ověřeno k 2026-10-07 (gitleaks 8.30.1) · volatilní
+# Výchozí pravidla gitleaks + pravidlo pro nové klíče Supabase. Nespoléhej, že výchozí sada zná každý formát klíče;
+# proto kontrola-p5.sh hledá sb_secret_ ještě zvlášť.
+# gitleaks si soubor .gitleaks.toml v kořeni repa načte sám (pre-commit hook z P1 i workflow na GitHubu).
+
+title = "darkondrej.cz/klub P5"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "supabase-secret-key"
+description = "Supabase secret key (sb_secret_...)"
+regex = '''sb_secret_[A-Za-z0-9_-]{16,}'''
+keywords = ["sb_secret_"]
